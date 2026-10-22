@@ -144,6 +144,7 @@ export const nativeFetch = async <T>(
       signal: req.signal,
     });
     const text = await response.text();
+    console.log(text, "RESPONSE");
     return parseResponse<T>(response, text, url);
   } catch (err) {
     throw toApiError(err, url, req, timeoutMs);

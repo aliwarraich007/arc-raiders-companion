@@ -21,7 +21,7 @@ export function Provider({ children }: { children: ReactNode }) {
           queries: {
             gcTime: 7 * DAY, // must be >= the longest persist maxAge
             staleTime: 5 * 60 * 1000,
-            retry: 2,
+            retry: 0,
             networkMode: "offlineFirst", // serve cache when offline
           },
         },
