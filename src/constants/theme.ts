@@ -7,10 +7,26 @@ import "@/global.css";
 
 import { Platform } from "react-native";
 
+const palette = {
+  ink: "#110B13", // your background
+  inkRaised: "#1B141E", // slightly lighter, for cards
+  inkSelected: "#2A2130",
+  cream: "#E9E1D0", // your text/secondary
+  creamMuted: "#9D978B",
+  accent: "#F2B134", // placeholder, replace with a real brand color
+  danger: "#E5484D",
+} as const;
+
 export const Colors = {
-  secondary: "#E9E1D0",
-  background: "#110B13",
-  text: "#E9E1D0",
+  background: palette.ink,
+  backgroundElement: palette.inkRaised,
+  backgroundSelected: palette.inkSelected,
+  text: palette.cream,
+  textSecondary: palette.creamMuted,
+  primary: palette.accent,
+  onPrimary: palette.ink, // text/icons on top of a primary button
+  border: "rgba(233, 225, 208, 0.12)",
+  danger: palette.danger,
 } as const;
 
 export type ThemeColor = keyof typeof Colors;
