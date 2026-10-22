@@ -36,7 +36,6 @@ export default function HomeScreen() {
     limit: 50,
   });
   const { status, data } = useFetchItems(pagination.page, pagination.limit);
-  console.log(data, "DATAT");
   return (
     <ThemedView
       style={{
