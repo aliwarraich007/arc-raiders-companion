@@ -3,53 +3,54 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
  */
 
-import '@/global.css';
+import "@/global.css";
 
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+  secondary: "#E9E1D0",
+  background: "#110B13",
+  text: "#E9E1D0",
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+// export const Fonts = Platform.select({
+//   ios: {
+//     // /** iOS `UIFontDescriptorSystemDesignDefault` */
+//     // sans: "system-ui",
+//     // /** iOS `UIFontDescriptorSystemDesignSerif` */
+//     // serif: "ui-serif",
+//     // /** iOS `UIFontDescriptorSystemDesignRounded` */
+//     // rounded: "ui-rounded",
+//     // /** iOS `UIFontDescriptorSystemDesignMonospaced` */
+//     // mono: "ui-monospace",
+//     regular: "Urbanist-Regular",
+//     semibold: "Urbanist-SemiBold",
+//     bold: "Urbanist-Bold",
+//   },
+//   default: {
+//     // sans: "normal",
+//     // serif: "serif",
+//     // rounded: "normal",
+//     // mono: "monospace",
+//     regular: "Urbanist-Regular",
+//     semibold: "Urbanist-SemiBold",
+//     bold: "Urbanist-Bold",
+//   },
+//   web: {
+//     sans: "var(--font-display)",
+//     serif: "var(--font-serif)",
+//     rounded: "var(--font-rounded)",
+//     mono: "var(--font-mono)",
+//   },
+// });
+
+export const Fonts = {
+  regular: "Urbanist-Regular",
+  semibold: "Urbanist-SemiBold",
+  bold: "Urbanist-Bold",
+} as const;
 
 export const Spacing = {
   half: 2,
