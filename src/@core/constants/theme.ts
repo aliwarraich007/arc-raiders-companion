@@ -8,10 +8,10 @@ import "@/global.css";
 import { Platform } from "react-native";
 
 const palette = {
-  ink: "#110B13", // your background
-  inkRaised: "#1B141E", // slightly lighter, for cards
+  ink: "#110B13",
+  inkRaised: "#1B141E",
   inkSelected: "#2A2130",
-  cream: "#E9E1D0", // your text/secondary
+  cream: "#E9E1D0",
   creamMuted: "#9D978B",
   accent: "#F2B134", // placeholder, replace with a real brand color
   danger: "#E5484D",
@@ -24,7 +24,7 @@ export const Colors = {
   text: palette.cream,
   textSecondary: palette.creamMuted,
   primary: palette.accent,
-  onPrimary: palette.ink, // text/icons on top of a primary button
+  onPrimary: palette.ink,
   border: "rgba(233, 225, 208, 0.12)",
   danger: palette.danger,
 } as const;

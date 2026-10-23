@@ -9,7 +9,7 @@ import {
 import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, useColorScheme, View } from "react-native";
 
-import { Colors, MaxContentWidth, Spacing } from "@/constants/theme";
+import { Colors, MaxContentWidth, Spacing } from "@/@core/constants/theme";
 
 import { ExternalLink } from "./external-link";
 import { ThemedText } from "./themed-text";

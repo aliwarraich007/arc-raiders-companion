@@ -1,3 +1,6 @@
+import { Href } from "expo-router";
+import { ImageURISource } from "react-native";
+
 export type ApiErrorKind =
   | "network" // no connection, DNS failure, TLS failure
   | "timeout" // exceeded timeoutMs
@@ -15,4 +18,11 @@ export type NativeFetchOptions = Omit<RequestInit, "signal"> & {
   signal?: AbortSignal;
   timeoutMs?: number;
   params?: Params;
+};
+
+export type HubCardItem = {
+  id: string;
+  label: string;
+  href: Href;
+  image: ImageURISource;
 };

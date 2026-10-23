@@ -1,5 +1,5 @@
+import { queryKeys } from "@/@core/constants/query-keys";
 import { nativeFetch } from "@/@core/helpers/fetch";
-import { queryKeys } from "@/constants/query-keys";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ArcRaidersItemsResponse } from "./types";
 

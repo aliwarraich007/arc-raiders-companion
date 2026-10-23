@@ -1,5 +1,5 @@
+import { BottomTabInset } from "@/@core/constants/theme";
 import { ApiError } from "@/@core/helpers/api-error";
-import { BottomTabInset } from "@/constants/theme";
 import { useFetchItems } from "@/features/home/api";
 import type {
   ArcRaidersItems,
@@ -156,7 +156,7 @@ function Button({
   );
 }
 
-export function ItemScreen() {
+export default function ItemScreen() {
   const [page, setPage] = useState(1);
   const listRef = useRef<FlatList<ArcRaidersItems>>(null);
 

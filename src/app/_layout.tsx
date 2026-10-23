@@ -1,4 +1,4 @@
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { AnimatedSplashOverlay } from "@/@ui/components/animated-icon";
 import { Provider } from "@/integrations/tanstack/tanstack-provider";
 import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -12,7 +12,7 @@ export default function RootLayout() {
       <Provider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(screens)" />
         </Stack>
       </Provider>
     </ThemeProvider>

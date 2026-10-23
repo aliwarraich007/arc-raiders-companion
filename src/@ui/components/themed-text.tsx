@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, Text, type TextProps } from "react-native";
 
-import { Fonts, ThemeColor } from "@/constants/theme";
+import { Fonts, ThemeColor } from "@/@core/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
 export type ThemedTextProps = TextProps & {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   default: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: 500,
+    fontWeight: 400,
   },
   title: {
     fontSize: 34,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   code: {
     fontFamily: Fonts.regular,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
+    fontWeight: Platform.select({ android: 500 }) ?? 500,
     fontSize: 12,
   },
 });

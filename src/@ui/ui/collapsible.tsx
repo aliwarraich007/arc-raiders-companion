@@ -3,9 +3,9 @@ import { PropsWithChildren, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
+import { Spacing } from "@/@core/constants/theme";
+import { ThemedText } from "@/@ui/components/themed-text";
+import { ThemedView } from "@/@ui/components/themed-view";
 import { useTheme } from "@/hooks/use-theme";
 
 export function Collapsible({
@@ -24,7 +24,7 @@ export function Collapsible({
         ]}
         onPress={() => setIsOpen((value) => !value)}
       >
-        <ThemedView type="secondary" style={styles.button}>
+        <ThemedView type="background" style={styles.button}>
           <SymbolView
             name={{
               ios: "chevron.right",
@@ -42,7 +42,7 @@ export function Collapsible({
       </Pressable>
       {isOpen && (
         <Animated.View entering={FadeIn.duration(200)}>
-          <ThemedView type="secondary" style={styles.content}>
+          <ThemedView type="background" style={styles.content}>
             {children}
           </ThemedView>
         </Animated.View>

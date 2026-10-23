@@ -1,19 +1,18 @@
-import { ThemedText } from "@/components/themed-text";
-import { Colors, Fonts, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Spacing } from "@/@core/constants/theme";
+import { ThemedText } from "@/@ui/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Landing() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   const handleSignIn = () => {
     // TODO: real Google auth, then:
-    //router.replace("/(tabs)/home");
+    router.replace("/(screens)/hub");
   };
 
   return (
@@ -31,12 +30,7 @@ export default function Landing() {
         />
       </View>
 
-      <View
-        style={[
-          styles.content,
-          { paddingBottom: insets.bottom + Spacing.four },
-        ]}
-      >
+      <SafeAreaView style={styles.content} edges={["bottom"]}>
         <View style={styles.textBlock}>
           <ThemedText style={styles.title}>Raiders Companion</ThemedText>
           <ThemedText style={styles.subtitle}>
@@ -57,7 +51,7 @@ export default function Landing() {
         <ThemedText style={styles.legal}>
           By continuing you agree to our Terms and Privacy Policy.
         </ThemedText>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }
@@ -68,7 +62,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   hero: {
-    // ...StyleSheet.absoluteFillObject,
     height: "62%",
   },
   fade: {
