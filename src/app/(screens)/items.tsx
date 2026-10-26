@@ -1,7 +1,5 @@
 import { BottomTabInset, Colors, Spacing } from "@/@core/constants/theme";
 import { useDebouncedValue } from "@/@core/hooks/useDebounce";
-import { useFetchItems } from "@/features/home/api";
-import { ArcRaidersItems } from "@/features/home/types";
 import {
   ItemCard,
   ItemDetailSheet,
@@ -11,7 +9,8 @@ import {
   SkeletonGrid,
   StateView,
 } from "@/features/items";
-import { TrackQuantitySheet } from "@/features/items/components/track-sheet";
+import { useFetchItems } from "@/features/items/api/api";
+import { ArcRaidersItems } from "@/features/items/api/types";
 import type { ItemFilters } from "@/features/items/types";
 import { errorCopy, toApiRarity } from "@/features/items/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,7 +26,6 @@ export default function ItemScreen() {
   const [rarity, setRarity] = useState<RarityFilterValue>("all");
   const [selected, setSelected] = useState<ArcRaidersItems | null>(null);
   const listRef = useRef<FlatList<ArcRaidersItems>>(null);
-  const [trackTarget, setTrackTarget] = useState<ArcRaidersItems | null>(null);
 
   const debouncedQuery = useDebouncedValue(query, 350);
   const { width } = useWindowDimensions();
@@ -93,12 +91,7 @@ export default function ItemScreen() {
           numColumns={COLUMNS}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ItemCard
-              item={item}
-              width={cardWidth}
-              onPress={setSelected}
-              onLongPress={setTrackTarget}
-            />
+            <ItemCard item={item} width={cardWidth} onPress={setSelected} />
           )}
           columnWrapperStyle={{ gap: GAP }}
           ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
@@ -140,10 +133,6 @@ export default function ItemScreen() {
       )}
 
       <ItemDetailSheet item={selected} onClose={() => setSelected(null)} />
-      <TrackQuantitySheet
-        item={trackTarget}
-        onClose={() => setTrackTarget(null)}
-      />
     </SafeAreaView>
   );
 }

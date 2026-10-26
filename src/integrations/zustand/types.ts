@@ -1,4 +1,4 @@
-import { ArcRaidersItems } from "@/features/home/types";
+import { ArcRaidersItems } from "@/features/items/api/types";
 
 export type TrackedItem = {
   id: string;
@@ -6,8 +6,9 @@ export type TrackedItem = {
   icon: string | null;
   rarity: string | null;
   item_type: string;
-  quantity: number;
-  updatedAt: number;
+  subcategory: string | null;
+  loot_area: string | null;
+  trackedAt: number;
 };
 
 export type State = {

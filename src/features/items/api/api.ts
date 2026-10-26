@@ -1,8 +1,8 @@
 import { queryKeys } from "@/@core/constants/query-keys";
 import { nativeFetch } from "@/@core/helpers/fetch";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { ItemFilters } from "../types";
 import { ArcRaidersItemsResponse } from "./types";
-import { ItemFilters } from "../items/types";
 
 const DAY = 24 * 60 * 60 * 1000;
 

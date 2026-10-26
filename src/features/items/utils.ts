@@ -1,6 +1,6 @@
 import { Colors, ItemPalette } from "@/@core/constants/theme";
 import { ApiError } from "@/@core/helpers/api-error";
-import type { ArcRaidersItems } from "@/features/home/types";
+import type { ArcRaidersItems } from "@/features/items/api/types";
 
 export const getRarityColor = (rarity?: string | null) =>
   ItemPalette[rarity?.toLowerCase() ?? ""] ?? Colors.textSecondary;

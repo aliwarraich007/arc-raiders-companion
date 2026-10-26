@@ -1,6 +1,7 @@
 import { Colors, Fonts } from "@/@core/constants/theme";
-import type { ArcRaidersItems } from "@/features/home/types";
+import type { ArcRaidersItems } from "@/features/items/api/types";
 import { useTrackedStore } from "@/integrations/zustand/tracked-store";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -10,26 +11,35 @@ type Props = {
   item: ArcRaidersItems;
   width: number;
   onPress: (item: ArcRaidersItems) => void;
-  onLongPress: (item: ArcRaidersItems) => void;
 };
 
 export const ItemCard = memo(function ItemCard({
   item,
   width,
   onPress,
-  onLongPress,
 }: Props) {
   const color = getRarityColor(item.rarity);
   const category = getCategory(item);
-  const quantity = useTrackedStore((s) => s.tracked[item.id]?.quantity);
+  const isTracked = useTrackedStore((s) => !!s.tracked[item.id]);
+  const toggle = useTrackedStore((s) => s.toggle);
+  const handleLongPress = async () => {
+    toggle(item);
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error) {
+      console.warn("Haptic feedback unavailable:", error);
+    }
+  };
 
   return (
     <Pressable
       onPress={() => onPress(item)}
-      onLongPress={() => onLongPress(item)}
+      onLongPress={handleLongPress}
       delayLongPress={350}
       accessibilityRole="button"
       accessibilityLabel={`${item.name}, ${item.rarity ?? "unknown rarity"}`}
+      accessibilityHint="Long press to track or untrack"
       style={({ pressed }) => [
         styles.card,
         {
@@ -62,13 +72,13 @@ export const ItemCard = memo(function ItemCard({
             <Text style={[styles.pillText, { color }]}>{item.rarity}</Text>
           </View>
         )}
-
-        {quantity != null && (
-          <View style={styles.qty}>
-            <Text style={styles.qtyText}>×{quantity}</Text>
-          </View>
-        )}
       </View>
+
+      {isTracked && (
+        <View style={styles.qty}>
+          <Text style={styles.qtyText}>★ Tracked</Text>
+        </View>
+      )}
 
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={1}>

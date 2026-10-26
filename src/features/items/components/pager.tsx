@@ -1,6 +1,6 @@
 import { Colors, Fonts } from "@/@core/constants/theme";
 import { Button } from "@/@ui/components/button";
-import type { ArcRaidersItemsResponse } from "@/features/home/types";
+import type { ArcRaidersItemsResponse } from "@/features/items/api/types";
 import { StyleSheet, Text, View } from "react-native";
 
 type Props = {

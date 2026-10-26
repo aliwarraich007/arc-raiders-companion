@@ -1,6 +1,6 @@
 import { Colors, Fonts, Spacing } from "@/@core/constants/theme";
 import { Button } from "@/@ui/components/button";
-import type { ArcRaidersItems } from "@/features/home/types";
+import type { ArcRaidersItems } from "@/features/items/api/types";
 import { Image } from "expo-image";
 import {
   Linking,
@@ -19,6 +19,8 @@ import {
   titleize,
   withAlpha,
 } from "../utils";
+import * as Haptics from "expo-haptics";
+import { useTrackedStore } from "@/integrations/zustand/tracked-store";
 
 type Props = { item: ArcRaidersItems | null; onClose: () => void };
 
@@ -78,6 +80,10 @@ function Chip({ label, color }: { label: string; color?: string }) {
 export function ItemDetailSheet({ item, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const color = getRarityColor(item?.rarity);
+  const isTracked = useTrackedStore((s) =>
+    item ? !!s.tracked[item.id] : false,
+  );
+  const toggle = useTrackedStore((s) => s.toggle);
 
   const stats = Object.entries(item?.stat_block ?? {}).filter(
     ([, v]) => v != null && v !== "",
@@ -291,7 +297,20 @@ export function ItemDetailSheet({ item, onClose }: Props) {
           </ScrollView>
 
           <View style={styles.footer}>
-            <Button label="Close" onPress={onClose} variant="primary" />
+            <View style={{ flex: 1 }}>
+              <Button
+                label={isTracked ? "★ Untrack" : "☆ Track"}
+                variant={isTracked ? "ghost" : "primary"}
+                onPress={() => {
+                  if (!item) return;
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  toggle(item);
+                }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button label="Close" onPress={onClose} />
+            </View>
           </View>
         </View>
       )}
@@ -413,5 +432,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: "center",
   },
-  footer: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
+  footer: {
+    flexDirection: "row",
+    gap: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
+  },
 });
