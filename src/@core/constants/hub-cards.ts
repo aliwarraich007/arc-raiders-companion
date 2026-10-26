@@ -2,7 +2,7 @@ import { HubCardItem } from "../types";
 
 export const HubCardData: HubCardItem[] = [
   {
-    id: "tracked-items",
+    id: "items",
     label: "Items",
     href: "/items",
     image: require("@/assets/arc/rooster.avif"),
@@ -17,6 +17,12 @@ export const HubCardData: HubCardItem[] = [
     id: "quests",
     label: "Quests",
     href: "/quests",
+    image: require("@/assets/arc/rooster.avif"),
+  },
+  {
+    id: "tracked-items",
+    label: "Tracked Items",
+    href: "/tracked-items",
     image: require("@/assets/arc/rooster.avif"),
   },
 ];

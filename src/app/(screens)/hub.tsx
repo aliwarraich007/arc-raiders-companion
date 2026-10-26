@@ -43,7 +43,7 @@ export default function Hub() {
         offset: (HUB_CARD_HEIGHT + ITEM_GAP) * index,
         index,
       })}
-      ListHeaderComponent={<ThemedText style={styles.title}>Hub</ThemedText>}
+      ListHeaderComponent={<ThemedText style={styles.title}>Home</ThemedText>}
       ItemSeparatorComponent={Separator}
       showsVerticalScrollIndicator={false}
       style={{ backgroundColor: theme.background }}
