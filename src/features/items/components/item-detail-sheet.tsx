@@ -1,4 +1,5 @@
 import { Colors, Fonts, Spacing } from "@/@core/constants/theme";
+import { Button } from "@/@ui/components/button";
 import type { ArcRaidersItems } from "@/features/home/types";
 import { Image } from "expo-image";
 import {
@@ -18,7 +19,6 @@ import {
   titleize,
   withAlpha,
 } from "../utils";
-import { Button } from "@/@ui/components/button";
 
 type Props = { item: ArcRaidersItems | null; onClose: () => void };
 

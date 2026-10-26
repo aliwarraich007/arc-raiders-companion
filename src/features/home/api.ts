@@ -14,7 +14,6 @@ export const useFetchItems = (
   useQuery({
     queryKey: queryKeys.items(page, limit, filters),
     queryFn: ({ signal }) => {
-      // only send params that have a value
       const params: Record<string, string | number> = { page, limit };
       if (filters.search) params.search = filters.search;
       if (filters.rarity) params.rarity = filters.rarity;

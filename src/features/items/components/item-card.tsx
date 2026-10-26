@@ -1,5 +1,6 @@
 import { Colors, Fonts } from "@/@core/constants/theme";
 import type { ArcRaidersItems } from "@/features/home/types";
+import { useTrackedStore } from "@/integrations/zustand/tracked-store";
 import { Image } from "expo-image";
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -9,24 +10,33 @@ type Props = {
   item: ArcRaidersItems;
   width: number;
   onPress: (item: ArcRaidersItems) => void;
+  onLongPress: (item: ArcRaidersItems) => void;
 };
 
 export const ItemCard = memo(function ItemCard({
   item,
   width,
   onPress,
+  onLongPress,
 }: Props) {
   const color = getRarityColor(item.rarity);
   const category = getCategory(item);
+  const quantity = useTrackedStore((s) => s.tracked[item.id]?.quantity);
 
   return (
     <Pressable
       onPress={() => onPress(item)}
+      onLongPress={() => onLongPress(item)}
+      delayLongPress={350}
       accessibilityRole="button"
       accessibilityLabel={`${item.name}, ${item.rarity ?? "unknown rarity"}`}
       style={({ pressed }) => [
         styles.card,
-        { width, borderColor: withAlpha(color, 0.35) },
+        {
+          width,
+          borderColor: withAlpha(color, 0.35),
+          justifyContent: "space-between",
+        },
         pressed && styles.pressed,
       ]}
     >
@@ -50,6 +60,12 @@ export const ItemCard = memo(function ItemCard({
             style={[styles.pill, { backgroundColor: withAlpha(color, 0.22) }]}
           >
             <Text style={[styles.pillText, { color }]}>{item.rarity}</Text>
+          </View>
+        )}
+
+        {quantity != null && (
+          <View style={styles.qty}>
+            <Text style={styles.qtyText}>×{quantity}</Text>
           </View>
         )}
       </View>
@@ -117,4 +133,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   bar: { height: 3 },
+  qty: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  qtyText: { color: Colors.onPrimary, fontFamily: Fonts.bold, fontSize: 11 },
 });
