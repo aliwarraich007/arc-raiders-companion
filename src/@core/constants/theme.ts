@@ -15,7 +15,16 @@ const palette = {
   creamMuted: "#9D978B",
   accent: "#F2B134", // placeholder, replace with a real brand color
   danger: "#E5484D",
+  // arc raiders specific
 } as const;
+
+export const ItemPalette: Record<string, string> = {
+  common: "#9A917B",
+  uncommon: "#6FA05A",
+  rare: "#4A8FBF",
+  epic: "#A864B8",
+  legendary: "#E0A93B",
+};
 
 export const Colors = {
   background: palette.ink,
@@ -30,37 +39,6 @@ export const Colors = {
 } as const;
 
 export type ThemeColor = keyof typeof Colors;
-
-// export const Fonts = Platform.select({
-//   ios: {
-//     // /** iOS `UIFontDescriptorSystemDesignDefault` */
-//     // sans: "system-ui",
-//     // /** iOS `UIFontDescriptorSystemDesignSerif` */
-//     // serif: "ui-serif",
-//     // /** iOS `UIFontDescriptorSystemDesignRounded` */
-//     // rounded: "ui-rounded",
-//     // /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-//     // mono: "ui-monospace",
-//     regular: "Urbanist-Regular",
-//     semibold: "Urbanist-SemiBold",
-//     bold: "Urbanist-Bold",
-//   },
-//   default: {
-//     // sans: "normal",
-//     // serif: "serif",
-//     // rounded: "normal",
-//     // mono: "monospace",
-//     regular: "Urbanist-Regular",
-//     semibold: "Urbanist-SemiBold",
-//     bold: "Urbanist-Bold",
-//   },
-//   web: {
-//     sans: "var(--font-display)",
-//     serif: "var(--font-serif)",
-//     rounded: "var(--font-rounded)",
-//     mono: "var(--font-mono)",
-//   },
-// });
 
 export const Fonts = {
   regular: "Urbanist-Regular",

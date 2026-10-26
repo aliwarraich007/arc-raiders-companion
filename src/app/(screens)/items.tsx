@@ -1,452 +1,148 @@
-import { BottomTabInset } from "@/@core/constants/theme";
-import { ApiError } from "@/@core/helpers/api-error";
+import { BottomTabInset, Colors, Spacing } from "@/@core/constants/theme";
+import { useDebouncedValue } from "@/@core/hooks/useDebounce";
 import { useFetchItems } from "@/features/home/api";
-import type {
-  ArcRaidersItems,
-  ArcRaidersItemsResponse,
-} from "@/features/home/types"; // adjust to where your types live
-import { Image } from "expo-image";
-import { memo, useCallback, useRef, useState } from "react";
+import { ArcRaidersItems } from "@/features/home/types";
 import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+  ItemCard,
+  ItemDetailSheet,
+  ItemsHeader,
+  Pager,
+  RarityFilterValue,
+  SkeletonGrid,
+  StateView,
+} from "@/features/items";
+import type { ItemFilters } from "@/features/items/types";
+import { errorCopy, toApiRarity } from "@/features/items/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FlatList, StyleSheet, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const LIMIT = 25;
-
-/* Worn field-manual palette: oily brown-black, parchment, safety orange. */
-const COLORS = {
-  bg: "#1A1814",
-  panel: "#25221C",
-  panelEdge: "#0F0E0B",
-  line: "#3A352B",
-  text: "#EADFC4",
-  muted: "#9A917B",
-  accent: "#F2762E",
-  mustard: "#E0A93B",
-};
-
-const RARITY: Record<string, string> = {
-  common: "#9A917B",
-  uncommon: "#6FA05A",
-  rare: "#4A8FBF",
-  epic: "#A864B8",
-  legendary: "#E0A93B",
-};
-
-const MONO = Platform.select({
-  ios: "Menlo",
-  android: "monospace",
-  default: "monospace",
-});
-
-/* ---------- Row ---------- */
-
-const ItemRow = memo(function ItemRow({ item }: { item: ArcRaidersItems }) {
-  const rarityColor = RARITY[item.rarity?.toLowerCase() ?? ""] ?? COLORS.muted;
-  const category = [item.item_type, item.subcategory]
-    .filter(Boolean)
-    .join(" / ");
-
-  return (
-    <View style={styles.card}>
-      <View style={[styles.spine, { backgroundColor: rarityColor }]} />
-
-      <View style={[styles.iconTile, { borderColor: rarityColor }]}>
-        {item.icon ? (
-          <Image
-            source={item.icon}
-            style={styles.icon}
-            contentFit="contain"
-            cachePolicy="disk"
-            transition={150}
-          />
-        ) : (
-          <Text style={[styles.iconFallback, { color: rarityColor }]}>
-            {item.name.charAt(0)}
-          </Text>
-        )}
-      </View>
-
-      <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={1}>
-          {item.name}
-        </Text>
-        {!!category && (
-          <Text style={styles.meta} numberOfLines={1}>
-            {category}
-          </Text>
-        )}
-        {!!item.description && (
-          <Text style={styles.desc} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-      </View>
-
-      <View style={styles.side}>
-        {!!item.rarity && (
-          <Text style={[styles.rarity, { color: rarityColor }]}>
-            {item.rarity}
-          </Text>
-        )}
-        {item.value != null && (
-          <Text style={styles.value}>{item.value.toLocaleString()}</Text>
-        )}
-      </View>
-    </View>
-  );
-});
-
-/* ---------- States ---------- */
-
-const errorCopy = (error: unknown) => {
-  if (error instanceof ApiError) {
-    switch (error.kind) {
-      case "network":
-        return "You're offline. Check your connection and try again.";
-      case "timeout":
-        return "The server took too long to answer. Try again.";
-      case "http":
-        return error.status === 429
-          ? "Too many requests. Wait a moment, then try again."
-          : `The server returned an error (${error.status}).`;
-      case "invalid-content":
-      case "parse":
-        return "The server sent data the app couldn't read.";
-    }
-  }
-  return "Something went wrong while loading items.";
-};
-
-function Centered({ children }: { children: React.ReactNode }) {
-  return <View style={styles.centered}>{children}</View>;
-}
-
-function Button({
-  label,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.button,
-        disabled && styles.buttonDisabled,
-        pressed && styles.buttonPressed,
-      ]}
-    >
-      <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
+const LIMIT = 24;
+const COLUMNS = 2;
+const GAP = 12;
 
 export default function ItemScreen() {
-  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const [rarity, setRarity] = useState<RarityFilterValue>("all");
+  const [selected, setSelected] = useState<ArcRaidersItems | null>(null);
   const listRef = useRef<FlatList<ArcRaidersItems>>(null);
 
-  const { status, data, error, refetch, isRefetching, isPlaceholderData } =
-    useFetchItems(page, LIMIT);
+  const debouncedQuery = useDebouncedValue(query, 350);
+  const { width } = useWindowDimensions();
+  const cardWidth = (width - Spacing.three * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
+  const filters = useMemo<ItemFilters>(() => {
+    const search = debouncedQuery.trim().slice(0, 100);
+    return {
+      search: search || undefined,
+      rarity: rarity === "all" ? undefined : toApiRarity(rarity),
+    };
+  }, [debouncedQuery, rarity]);
 
-  const goToPage = useCallback((next: number) => {
-    setPage(next);
+  const filterKey = `${filters.search ?? ""}|${filters.rarity ?? ""}`;
+  const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
+  const page = pageState.key === filterKey ? pageState.page : 1;
+
+  const { status, data, error, refetch, isRefetching, isPlaceholderData } =
+    useFetchItems(page, LIMIT, filters);
+
+  const goToPage = useCallback(
+    (next: number) => {
+      setPageState({ key: filterKey, page: next });
+      listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    },
+    [filterKey],
+  );
+
+  useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [filterKey]);
+
+  const clearFilters = useCallback(() => {
+    setQuery("");
+    setRarity("all");
   }, []);
 
-  const pagination = data?.pagination;
+  const filtering = !!filters.search || !!filters.rarity;
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Item index</Text>
-        <Text style={styles.subtitle}>
-          {pagination
-            ? `${pagination.total.toLocaleString()} items on file`
-            : "Loading records..."}
-        </Text>
-        <View style={styles.ruleThick} />
-        <View style={styles.ruleThin} />
-      </View>
+      <ItemsHeader
+        total={data?.pagination.total}
+        query={query}
+        onQueryChange={setQuery}
+        rarity={rarity}
+        onRarityChange={setRarity}
+      />
 
       {status === "pending" ? (
-        <Centered>
-          <ActivityIndicator color={COLORS.accent} size="large" />
-          <Text style={styles.stateText}>Loading items...</Text>
-        </Centered>
+        <SkeletonGrid cardWidth={cardWidth} gap={GAP} />
       ) : status === "error" ? (
-        <Centered>
-          <Text style={styles.stateTitle}>Couldn't load items</Text>
-          <Text style={styles.stateText}>{errorCopy(error)}</Text>
-          <Button label="Try again" onPress={() => refetch()} />
-        </Centered>
+        <StateView
+          glyph="!"
+          title="Couldn't load items"
+          message={errorCopy(error)}
+          actionLabel="Try again"
+          onAction={() => refetch()}
+        />
       ) : (
         <FlatList
           ref={listRef}
           data={data.data}
+          numColumns={COLUMNS}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ItemRow item={item} />}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          renderItem={({ item }) => (
+            <ItemCard item={item} width={cardWidth} onPress={setSelected} />
+          )}
+          columnWrapperStyle={{ gap: GAP }}
+          ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
           contentContainerStyle={[
             styles.listContent,
-            { paddingBottom: BottomTabInset + 24 },
+            { paddingBottom: BottomTabInset + Spacing.four },
           ]}
           style={isPlaceholderData ? styles.dimmed : undefined}
-          refreshing={isRefetching}
+          refreshing={isRefetching && !isPlaceholderData}
           onRefresh={() => refetch()}
-          initialNumToRender={10}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          initialNumToRender={8}
           windowSize={7}
           removeClippedSubviews
           ListEmptyComponent={
-            <Centered>
-              <Text style={styles.stateTitle}>No items found</Text>
-              <Text style={styles.stateText}>
-                Pull down to refresh the list.
-              </Text>
-            </Centered>
+            <StateView
+              glyph="⌕"
+              title="No items found"
+              message={
+                filtering
+                  ? "No items match your search. Try different keywords or clear the filters."
+                  : "Pull down to refresh the list."
+              }
+              actionLabel={filtering ? "Clear filters" : undefined}
+              onAction={filtering ? clearFilters : undefined}
+            />
           }
           ListFooterComponent={
-            <Pager
-              page={page}
-              pagination={data.pagination}
-              onChange={goToPage}
-            />
+            data.data.length > 0 ? (
+              <Pager
+                page={page}
+                pagination={data.pagination}
+                onChange={goToPage}
+              />
+            ) : undefined
           }
         />
       )}
+
+      <ItemDetailSheet item={selected} onClose={() => setSelected(null)} />
     </SafeAreaView>
   );
 }
 
-function Pager({
-  page,
-  pagination,
-  onChange,
-}: {
-  page: number;
-  pagination: ArcRaidersItemsResponse["pagination"];
-  onChange: (page: number) => void;
-}) {
-  return (
-    <View style={styles.pager}>
-      <Button
-        label="Previous"
-        disabled={!pagination.hasPrevPage}
-        onPress={() => onChange(page - 1)}
-      />
-      <Text style={styles.pagerText}>
-        {pagination.page} / {pagination.totalPages}
-      </Text>
-      <Button
-        label="Next"
-        disabled={!pagination.hasNextPage}
-        onPress={() => onChange(page + 1)}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-
-  /* header */
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  title: {
-    fontFamily: MONO,
-    fontSize: 30,
-    fontWeight: "800",
-    color: COLORS.accent,
-    letterSpacing: 1,
-  },
-  subtitle: {
-    fontFamily: MONO,
-    fontSize: 13,
-    color: COLORS.muted,
-    marginTop: 2,
-    marginBottom: 12,
-  },
-  ruleThick: {
-    height: 4,
-    backgroundColor: COLORS.accent,
-  },
-  ruleThin: {
-    height: 1,
-    backgroundColor: COLORS.line,
-    marginTop: 3,
-  },
-
-  /* list */
+  screen: { flex: 1, backgroundColor: Colors.background },
   listContent: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.three,
     flexGrow: 1,
   },
-  separator: {
-    height: 10,
-  },
-  dimmed: {
-    opacity: 0.45,
-  },
-
-  /* card: square corners and a hard bottom/right edge for a stamped, tactile feel */
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.panel,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    borderBottomWidth: 4,
-    borderRightWidth: 4,
-    borderBottomColor: COLORS.panelEdge,
-    borderRightColor: COLORS.panelEdge,
-    borderRadius: 2,
-    paddingVertical: 10,
-    paddingRight: 12,
-    gap: 12,
-    overflow: "hidden",
-  },
-  spine: {
-    width: 6,
-    alignSelf: "stretch",
-    marginVertical: -10,
-  },
-  iconTile: {
-    width: 60,
-    height: 60,
-    backgroundColor: COLORS.bg,
-    borderWidth: 1,
-    borderRadius: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  icon: {
-    width: 48,
-    height: 48,
-  },
-  iconFallback: {
-    fontFamily: MONO,
-    fontSize: 24,
-    fontWeight: "800",
-  },
-  body: {
-    flex: 1,
-    gap: 2,
-  },
-  name: {
-    fontFamily: MONO,
-    fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  meta: {
-    fontFamily: MONO,
-    fontSize: 11,
-    color: COLORS.mustard,
-  },
-  desc: {
-    fontSize: 12,
-    lineHeight: 16,
-    color: COLORS.muted,
-    marginTop: 2,
-  },
-  side: {
-    alignItems: "flex-end",
-    gap: 4,
-    minWidth: 56,
-  },
-  rarity: {
-    fontFamily: MONO,
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  value: {
-    fontFamily: MONO,
-    fontSize: 14,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-
-  /* pager */
-  pager: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  pagerText: {
-    fontFamily: MONO,
-    fontSize: 14,
-    color: COLORS.text,
-  },
-
-  /* buttons */
-  button: {
-    backgroundColor: COLORS.accent,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 2,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderColor: "#A84A13",
-  },
-  buttonPressed: {
-    transform: [{ translateX: 2 }, { translateY: 2 }],
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-  },
-  buttonDisabled: {
-    backgroundColor: COLORS.panel,
-    borderColor: COLORS.line,
-  },
-  buttonText: {
-    fontFamily: MONO,
-    fontWeight: "800",
-    fontSize: 13,
-    color: COLORS.bg,
-  },
-  buttonTextDisabled: {
-    color: COLORS.muted,
-  },
-
-  /* loading / error / empty */
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    padding: 24,
-  },
-  stateTitle: {
-    fontFamily: MONO,
-    fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  stateText: {
-    fontSize: 14,
-    color: COLORS.muted,
-    textAlign: "center",
-    maxWidth: 280,
-  },
+  dimmed: { opacity: 0.45 },
 });
